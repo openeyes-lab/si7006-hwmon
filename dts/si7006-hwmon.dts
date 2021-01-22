@@ -1,0 +1,24 @@
+/*
+ * Device tree overlay for si7006 on i2c.1
+ */
+/dts-v1/;
+/plugin/;
+
+/ {
+
+	compatible = "brcm,bcm2835", "brcm,bcm2836", "brcm,bcm2708", "brcm,bcm2709";
+
+	/* the i2c config of the sd108-gpio itself binding everything together */
+	fragment@0 {
+		target = <&i2c1>;
+		__overlay__ {
+			#address-cells = <1>;
+			#size-cells = <0>;
+			si7006@40 {
+				compatible = "i2c,si7006";
+				reg = <0x40>;
+				status = "okay";
+			};
+		};
+	};
+};
