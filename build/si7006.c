@@ -22,13 +22,14 @@
 
 #include <linux/module.h>
 #include <linux/i2c.h>
-#include <linux/regmap.h>
 #include <linux/hwmon.h>
 #include "si7006.h"
 
-const struct regmap_config si7006_regmap_config = {
-	.max_register = SI7006_NUM_REGS - 1,
+static const struct i2c_device_id si7006_id[] = {
+	{ "si7006", 0 },
+	{ }
 };
+MODULE_DEVICE_TABLE(i2c, si7006_id);
 
 /**
  * @brief HWMON function to get temperature
@@ -41,26 +42,26 @@ const struct regmap_config si7006_regmap_config = {
 static int si7006_get_master_temperature(struct device *dev,
 				      struct si7006_private *data, long *val)
 {
-	char buf[6];
-	int  error;
-	int code;
+	char buf[2];
 	long long temp;
+	int raw_temp;
+	int  ret;
 
-	/* Put the 2-byte command into the buffer */
+	/* Put the command into the buffer */
 	buf[0] = SI7006_MEAS_TEMP_MASTER_MODE;
 
 	/* Send the command */
-	error = i2c_master_send(data->client, buf, 1);
-	if (error < 0)
-				 return error;
+	ret = i2c_master_send(data->client, buf, 1);
+	if (ret < 0)
+				 return ret;
 
 	/* Receive the 2-byte result */
-	error = i2c_master_recv(data->client, buf, 2);
-	if (error < 0)
-		return error;
+	ret = i2c_master_recv(data->client, buf, 2);
+	if (ret < 0)
+		return ret;
 
-	code = buf[1] + buf[0]*256;
-	temp = ((long long)(code)*175720)/65536-46850;
+	raw_temp = buf[1] + buf[0]*256;
+	temp = ((long long)(raw_temp)*175720)/65536-46850;
 	*val = (long)temp;
 
 	return 0;
@@ -78,27 +79,27 @@ static int si7006_get_master_humidity(struct device *dev,
 				      struct si7006_private *data, long *val)
 {
 	char buf[6];
-	int  error;
-	int code;
-	long long temp;
+	long long humidity;
+	int raw_humidity;
+	int  ret;
 
-	/* Put the 1-byte command into the buffer */
+	/* Put the command into the buffer */
 	buf[0] = SI7006_MEAS_REL_HUMIDITY_MASTER_MODE;
 
 	/* Send the command */
-	error = i2c_master_send(data->client, buf, 1);
-	if (error < 0)
-				 return error;
+	ret = i2c_master_send(data->client, buf, 1);
+	if (ret < 0)
+				 return ret;
 
 	/* Receive the 2-byte result */
-	error = i2c_master_recv(data->client, buf, 2);
-	if (error < 0)
-		return error;
+	ret = i2c_master_recv(data->client, buf, 2);
+	if (ret < 0)
+		return ret;
 
-	code = buf[1] + buf[0]*256;
+	raw_humidity = buf[1] + buf[0]*256;
 
-	temp = ((long long)(code)*125000)/65536-6000;
-	*val = (long)temp;
+	humidity = ((long long)(raw_humidity)*125000)/65536-6000;
+	*val = (long)humidity;
 
 	return 0;
 }
@@ -419,7 +420,7 @@ static umode_t si7006_is_visible(const void *data, enum hwmon_sensor_types type,
  ****************************************************************************/
 
 static const u32 si7006_temperature_config[] = {
-	(HWMON_T_INPUT|HWMON_I_LABEL|HWMON_T_MAX|HWMON_T_MIN),
+	(HWMON_T_INPUT|HWMON_T_LABEL|HWMON_T_MAX|HWMON_T_MIN),
 	0
 };
 
@@ -429,7 +430,7 @@ static const struct hwmon_channel_info si7006_temperature = {
 };
 
 static const u32 si7006_humidity_config[] = {
-	(HWMON_H_INPUT|HWMON_I_LABEL|HWMON_H_MAX|HWMON_H_MIN),
+	(HWMON_H_INPUT|HWMON_H_LABEL|HWMON_H_MAX|HWMON_H_MIN),
 	0
 };
 
@@ -446,8 +447,8 @@ static const struct hwmon_channel_info *si7006_info[] = {
 
 static const struct hwmon_ops si7006_hwmon_ops = {
 	.is_visible = si7006_is_visible,
-	.read = si7006_read,
 	.read_string = si7006_read_string,
+	.read = si7006_read
 };
 
 static const struct hwmon_chip_info si7006_chip_info = {
@@ -487,8 +488,7 @@ static int si7006_get_device_id(struct i2c_client *client, int *id)
 /****************************************************************************
  * Si7006 PROBE
  ****************************************************************************/
-
-static int si7006_i2c_probe(struct i2c_client *client,
+static int si7006_probe(struct i2c_client *client,
 			    const struct i2c_device_id *id)
 {
 	struct device *dev = &client->dev;
@@ -524,17 +524,16 @@ static int si7006_i2c_probe(struct i2c_client *client,
 	return 0;
 }
 
+static int si7006_i2c_probe(struct i2c_client *client,
+			    const struct i2c_device_id *id)
+{
+	return si7006_probe(client,id);
+}
+
 static int si7006_remove(struct i2c_client *client)
 {
 	return 0;
 }
-
-static const struct i2c_device_id si7006_id[] = {
-	{ "si7006", 0 },
-	{ }
-};
-MODULE_DEVICE_TABLE(i2c, si7006_id);
-
 
 static struct i2c_driver si7006_i2c_driver = {
 		.class		= I2C_CLASS_HWMON,
@@ -545,7 +544,6 @@ static struct i2c_driver si7006_i2c_driver = {
 		.remove	  = si7006_remove,
 		.id_table = si7006_id,
 };
-
 module_i2c_driver(si7006_i2c_driver);
 
 MODULE_DESCRIPTION("HWMON Si7006 driver");
