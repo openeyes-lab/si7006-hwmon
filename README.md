@@ -10,8 +10,9 @@ This driver is tested under the Linux 5.X kernels.
 
 For more information about OPEN-EYES-II devices visit http://www.open-eyes.it
 
-The Si7006-hwmon Linux driver dialogues with the Silicon Labs chip Si7006 mounted
-on the OPEN-EYES-RPI multifunction access system based on Rasberry compute module CM3
+The Si7006-hwmon Linux driver dialogues with the Silicon Labs chip Si7006 
+https://www.silabs.com/documents/public/data-sheets/Si7006-A20.pdf
+mounted on the OPEN-EYES-RPI multifunction access system based on Rasberry compute module CM3
 
 The sensor measures temperature and humidity on the board.
 
