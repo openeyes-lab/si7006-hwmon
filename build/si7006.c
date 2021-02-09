@@ -364,10 +364,10 @@ static int si7006_read_string(struct device *dev, enum hwmon_sensor_types type,
 		       u32 attr, int channel, const char **str)
 {
 	switch (type) {
-		case case hwmon_temp:
+		case hwmon_temp:
 			*str = "BOARD TEMP";
 			return 0;
-		case case hwmon_humidity:
+		case hwmon_humidity:
 			*str = "BOARD HR";
 			return 0;
 		default:
