@@ -24,7 +24,6 @@
 #include <linux/i2c.h>
 #include <linux/regmap.h>
 #include <linux/hwmon.h>
-
 #include "si7006.h"
 
 const struct regmap_config si7006_regmap_config = {
