@@ -4,11 +4,11 @@
 [![License: LGPL v3](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
 
 This repository contains Linux drivers for hardware monitor module implemented
-on OPEN-EYES-II devices from OPEN-EYES S.r.L.
+on OPEN-EYES-RPI devices from OPEN-EYES S.r.L.
 This driver is licensed under the Gnu Public License.
 This driver is tested under the Linux 5.X kernels.
 
-For more information about OPEN-EYES-II devices visit http://www.open-eyes.it
+For more information about OPEN-EYES-RPI devices visit http://www.open-eyes.it
 
 The Si7006-hwmon Linux driver dialogues with the Silicon Labs chip Si7006 
 https://www.silabs.com/documents/public/data-sheets/Si7006-A20.pdf
